@@ -1,8 +1,8 @@
 # About
 
 These are some really bad utilities for creating GPX files that will
-work with my old-ass 2005 Garmin ETrex.  The ETrex has some great
-properties:
+work with my old-ass [2005 Garmin ETrex](https://www.amazon.com/Garmin-eTrex-Waterproof-Hiking-GPS/dp/B00003WGP5)
+.  The ETrex has some great properties:
 
  * No maps
  * Very basic breadcrumb support
