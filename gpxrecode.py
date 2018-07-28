@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# DEPRECATED? I think tcxrecode is better
+
 # Take a gpx xml file from RideWithGPS and convert the route points to something my ETrex can use.
 
 import math
@@ -15,13 +17,15 @@ from xml.sax.saxutils import XMLFilterBase,  XMLGenerator
 
 waypoints = []
 
-NAME=0
-LAT=1
-LON=2
+NAME = 0
+LAT = 1
+LON = 2
+
 
 def shorten_rtept(rtept):
     """ETrex only supports 6 upper case characters"""
     return rtept.upper()[:6].strip()
+
 
 def comment_to_rtept(comment):
     """Take a ridewithGPS comment and make a nice short routepoint out of it"""
@@ -84,7 +88,6 @@ class gpxfilter(XMLFilterBase):
     to the comment map.
     """
 
-
     def __init__(self, In, Out, turn_map):
         XMLFilterBase.__init__(self, In)
         self._turn_map = turn_map
@@ -119,7 +122,8 @@ class gpxfilter(XMLFilterBase):
             self.in_cmt = False
             return
         if name != self.element_stack[-1][NAME]:
-            print "ERROR expected " + str(self.element_stack[-1])[0] + " got " + str(name)
+            print "ERROR expected " + \
+                str(self.element_stack[-1])[0] + " got " + str(name)
         self.element_stack.pop(-1)
         self.Out.endElement(name)
         self.Out.characters("\n" + "   "*(len(self.element_stack) - 1))
@@ -132,7 +136,8 @@ class gpxfilter(XMLFilterBase):
             return
 
         # Let it blow up on key error
-        name = self._turn_map["%s,%s" % (self.element_stack[-2][LAT], self.element_stack[-2][LON])]
+        name = self._turn_map["%s,%s" % (
+            self.element_stack[-2][LAT], self.element_stack[-2][LON])]
 
         self.last_waypoint = name
         basename = name
@@ -150,7 +155,7 @@ class gpxfilter(XMLFilterBase):
                 name = basename[0:6 - len(str(i))] + str(i)
             try:
                 match_index = [n[NAME] for n in waypoints].index(name)
-            except: #didn't find a match
+            except:  # didn't find a match
                 if self.element_stack[-2][LAT] is not None:
                     waypoints.append([name,
                                       self.element_stack[-2][LAT],
@@ -158,8 +163,10 @@ class gpxfilter(XMLFilterBase):
                 found = True
                 break
 
-            diff_lat = abs(float(self.element_stack[-2][LAT]) - float(waypoints[match_index][LAT]))
-            diff_lon = abs(float(self.element_stack[-2][LON]) - float(waypoints[match_index][LON]))
+            diff_lat = abs(
+                float(self.element_stack[-2][LAT]) - float(waypoints[match_index][LAT]))
+            diff_lon = abs(
+                float(self.element_stack[-2][LON]) - float(waypoints[match_index][LON]))
             if diff_lat <= .0003 and diff_lon <= .0003:
                 found = True
                 break
@@ -174,9 +181,9 @@ if __name__ == "__main__":
         print "waypoints are cached in ~/.gpswaypoints"
         sys.exit(1)
     try:
-    #   #try to load waypoint cache
-       f = open(os.getenv('HOME')+"/.gpswaypoints","r")
-       contrib,waypoints = pickle.load(f)
+        #   #try to load waypoint cache
+        f = open(os.getenv('HOME')+"/.gpswaypoints", "r")
+        contrib, waypoints = pickle.load(f)
     except:
         contrib = []
         waypoints = []
@@ -184,7 +191,8 @@ if __name__ == "__main__":
     in_name = sys.argv[1]
     out_name = os.path.basename(in_name)
     ext_place = out_name.rfind('.')
-    out_name = os.path.join(sys.argv[2],out_name[0:ext_place]+"-recode"+out_name[ext_place:])
+    out_name = os.path.join(
+        sys.argv[2], out_name[0:ext_place]+"-recode"+out_name[ext_place:])
     try:
         print "output to", out_name
         out = open(out_name, "w")
@@ -206,9 +214,9 @@ if __name__ == "__main__":
         print "couldn't open input file"
         sys.exit(1)
 
-    f = open(os.getenv('HOME')+"/.gpswaypoints","w")
-    #save the cache
+    f = open(os.getenv('HOME')+"/.gpswaypoints", "w")
+    # save the cache
     if os.path.split(sys.argv[1])[1] not in contrib:
-       contrib = contrib+[os.path.split(sys.argv[1])[1]]
-    pickle.dump([contrib,waypoints],f)
+        contrib = contrib+[os.path.split(sys.argv[1])[1]]
+    pickle.dump([contrib, waypoints], f)
     out.close()
