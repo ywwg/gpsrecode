@@ -1,26 +1,29 @@
 #!/usr/bin/python
 
-#take a tcx xml file from ridewithgps.com and recode it to gpx,
-#using the notes to name the waypoints and filling out blanks
+# take a tcx xml file from ridewithgps.com and recode it to gpx,
+# using the notes to name the waypoints and filling out blanks
 
-#build up a list of route points and comments
-#go through points
-#if corresponding comment, use comment.  otherwise use last comment with incremented number
+# build up a list of route points and comments
+# go through points
+# if corresponding comment, use comment.  otherwise use last comment with incremented number
 
 import string
 import pickle
-import os,os.path,sys
+import os
+import os.path
+import sys
 import math
 
 import xml.sax
 from xml.sax.saxutils import XMLFilterBase,  XMLGenerator
+
 
 class tcxfilter(XMLFilterBase):
     def __init__(self, In, Out):
         XMLFilterBase.__init__(self, In)
         self.Out = Out
         self.in_coursepoint = False
-        self.current_coursepoint = {'lat':None, 'lon':None, 'name':None}
+        self.current_coursepoint = {'lat': None, 'lon': None, 'name': None}
         self.element_type = ""
         self.value = None
         self.coursepoints = []
@@ -38,15 +41,18 @@ class tcxfilter(XMLFilterBase):
             return
         if name == "LatitudeDegrees":
             if self.current_coursepoint['lat'] is not None:
-                print "ERROR: current trackpoint already has latitude set", self.current_coursepoint['lat']
+                print "ERROR: current trackpoint already has latitude set",
+                    self.current_coursepoint['lat']
             self.element_type = "NUMBER"
         elif name == "LongitudeDegrees":
             if self.current_coursepoint['lon'] is not None:
-                print "ERROR: current trackpoint already has longitude set", self.current_coursepoint['lon']
+                print "ERROR: current trackpoint already has longitude set",
+                    self.current_coursepoint['lon']
             self.element_type = "NUMBER"
         elif name == "Name":
             if self.current_coursepoint['name'] is not None:
-                print "ERROR: current trackpoint already has name set", self.current_coursepoint['name']
+                print "ERROR: current trackpoint already has name set",
+                    self.current_coursepoint['name']
             self.element_type = "TEXT"
         else:
             return
@@ -63,7 +69,7 @@ class tcxfilter(XMLFilterBase):
         if name == "CoursePoint":
             self.in_coursepoint = False
             self.coursepoints.append(self.current_coursepoint)
-            self.current_coursepoint = {'lat':None, 'lon':None, 'name':None}
+            self.current_coursepoint = {'lat': None, 'lon': None, 'name': None}
             self.process_chars = False
         elif name == "Course":
             self.write_course()
@@ -87,7 +93,7 @@ class tcxfilter(XMLFilterBase):
             self.value = content.strip()
 
     def write_course(self):
-        schema = {"xmlns:xsi":"http://www.w3.org/2001/XMLSchema-instance",
+        schema = {"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
                   "xmlns": "http://www.topografix.com/GPX/1/1",
                   "version": "1.1",
                   "xsi:schemaLocation": "http://www.topografix.com/GPX/1/1    http://www.topografix.com/GPX/1/1/gpx.xsd",
@@ -100,7 +106,7 @@ class tcxfilter(XMLFilterBase):
         self.Out.characters(self.route_name)
         self.Out.endElement("name")
         last_name = "START"
-        for i,r in enumerate(self.coursepoints):
+        for i, r in enumerate(self.coursepoints):
             if r['name'] == "" or r['name'] is None:
                 r['name'] = last_name
             r['name'] = self.rewrite_name(r)
@@ -131,7 +137,8 @@ class tcxfilter(XMLFilterBase):
         return "UNKNOWN"
 
     def write_element(self, coursepoint):
-        attrs = {'lat':str(coursepoint['lat']), 'lon':str(coursepoint['lon'])}
+        attrs = {'lat': str(coursepoint['lat']),
+                 'lon': str(coursepoint['lon'])}
         self.Out.characters("\n" + "    " * 2)
         self.Out.startElement("rtept", attrs)
         self.Out.characters("\n" + "    " * 3)
@@ -141,22 +148,23 @@ class tcxfilter(XMLFilterBase):
         self.Out.characters("\n" + "    " * 2)
         self.Out.endElement("rtept")
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print "need input file and output folder"
         print "waypoints are cached in ~/.gpswaypoints (DISABLED AND UNSUPPORTED ANYWAY)"
         sys.exit(1)
-    #try:
-    ##   #try to load waypoint cache
+    # try:
+    # try to load waypoint cache
     #   f = open(os.getenv('HOME')+"/.gpswaypoints","r")
     #   contrib,waypoints = pickle.load(f)
-    #except:
+    # except:
     #    contrib = []
     #    waypoints = []
 
     in_name = sys.argv[1]
     ext_place = in_name.rfind('.')
-    out_name = os.path.join(sys.argv[2],in_name[0:ext_place]+"-recode.gpx")
+    out_name = os.path.join(sys.argv[2], in_name[0:ext_place]+"-recode.gpx")
     try:
         out = open(out_name, "w")
     except Exception, e:
@@ -174,8 +182,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     #f = open(os.getenv('HOME')+"/.gpswaypoints","w")
-    ##save the cache
-    #if os.path.split(sys.argv[1])[1] not in contrib:
+    # save the cache
+    # if os.path.split(sys.argv[1])[1] not in contrib:
     #   contrib = contrib+[os.path.split(sys.argv[1])[1]]
-    #pickle.dump([contrib,waypoints],f)
-    #out.close()
+    # pickle.dump([contrib,waypoints],f)
+    # out.close()
