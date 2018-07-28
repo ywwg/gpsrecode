@@ -28,8 +28,12 @@ def comment_to_rtept(comment):
 
     if comment == "Start of route":
         return "START"
-    if comment == "End of route":
+    elif comment == "End of route":
         return "END"
+    elif comment == "Turn right":
+        return "RIGHT"
+    elif comment == "Turn left":
+        return "LEFT"
 
     ONTO_MATCHER = re.compile("onto (.*)$")
     STAY_MATCHER = re.compile("to stay on (.*)$")
@@ -43,7 +47,7 @@ def comment_to_rtept(comment):
         if match is not None:
             return match.group(1)
 
-    print "Warning: unhandled comment format", comment
+    print "Warning, unhandled comment format:", comment
     return comment
 
 
