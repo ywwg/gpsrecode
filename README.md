@@ -1,3 +1,5 @@
+# About
+
 These are some really bad utilities for creating GPX files that will
 work with my old-ass 2005 Garmin ETrex.  The ETrex has some great
 properties:
@@ -12,7 +14,7 @@ properties:
 
 This device is very endearing even though it's objectively bad.
 
-== Use ==
+# Use
 
 Currently tcxrecode.py is the better-supported converter.  I use it
 to take TCX files from ridewithgps and convert them to GCX.  Then
