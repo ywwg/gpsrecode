@@ -7,6 +7,9 @@
 # go through points
 # if corresponding comment, use comment.  otherwise use last comment with incremented number
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 import string
 import pickle
 import os
@@ -41,18 +44,18 @@ class tcxfilter(XMLFilterBase):
             return
         if name == "LatitudeDegrees":
             if self.current_coursepoint['lat'] is not None:
-                print "ERROR: current trackpoint already has latitude set",
-                    self.current_coursepoint['lat']
+                print ("ERROR: current trackpoint already has latitude set",
+                       self.current_coursepoint['lat'])
             self.element_type = "NUMBER"
         elif name == "LongitudeDegrees":
             if self.current_coursepoint['lon'] is not None:
-                print "ERROR: current trackpoint already has longitude set",
-                    self.current_coursepoint['lon']
+                print ("ERROR: current trackpoint already has longitude set",
+                       self.current_coursepoint['lon'])
             self.element_type = "NUMBER"
         elif name == "Name":
             if self.current_coursepoint['name'] is not None:
-                print "ERROR: current trackpoint already has name set",
-                    self.current_coursepoint['name']
+                print ("ERROR: current trackpoint already has name set",
+                       self.current_coursepoint['name'])
             self.element_type = "TEXT"
         else:
             return
@@ -180,6 +183,20 @@ if __name__ == "__main__":
     except IOError, e:
         print "couldn't open input file"
         sys.exit(1)
+
+    # Sanity check: want no dupe points
+    seen = []
+    for p in filter_handler.coursepoints:
+        if p['name'] in seen:
+            print "WARNING: Duplicate point name: ", p['name']
+        seen.append(p['name'])
+
+    # Plot the route so we can double-check!
+    # TODO: refactor into a separate module so I can look at all my courses
+    route_x = np.float64([p['lon'] for p in filter_handler.coursepoints])
+    route_y = np.float64([p['lat'] for p in filter_handler.coursepoints])
+    plt.plot(route_x, route_y)
+    plt.show()
 
     #f = open(os.getenv('HOME')+"/.gpswaypoints","w")
     # save the cache
